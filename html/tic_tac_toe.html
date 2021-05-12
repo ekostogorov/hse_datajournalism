@@ -1,0 +1,191 @@
+<html lang='ru'>
+
+  <head>
+    <title>Крестики-нолики</title>
+    <style>
+      .game-container {
+        display: grid;
+        grid-template-columns: repeat(3, auto);
+        width: 306px;
+        
+        margin: 50px auto;
+      }
+
+      .cell {
+        border: 1px solid #000000;
+        width: 100px;
+        height: 100px;
+      }
+
+      #status-container {
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+      }
+
+      #header {
+        font-family: 'Permanent Marker', cursive;
+        color: #000000;
+        font-size: 30px;
+      }
+
+      #start-button {
+        margin-left: auto;
+        margin-right: auto;
+        width: 100px;
+        display: block;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id='status-container'>
+      <p id='header'>Крестики-нолики</p>
+    </div>
+    <button id='start-button'>Начать!</button>
+    <div class='game-container'>
+      <div class='cell' cell-index='0'></div>
+      <div class='cell' cell-index='1'></div>
+      <div class='cell' cell-index='2'></div>
+      <div class='cell' cell-index='3'></div>
+      <div class='cell' cell-index='4'></div>
+      <div class='cell' cell-index='5'></div>
+      <div class='cell' cell-index='6'></div>
+      <div class='cell' cell-index='7'></div>
+      <div class='cell' cell-index='8'></div>
+    </div>
+  </body>
+  <script>
+    const playerX = 'X';
+    const playerO = 'O';
+
+    let currentPlayer = playerX;
+
+    let isGameActive = false;
+
+    let clickedCells = {};
+
+    let playerXState = [];
+    let playerOState = [];
+
+    const winningConditions = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6]
+    ];
+
+    function handleStartButton() {
+      clean();
+      
+      isGameActive = true;
+      
+      const header = document.getElementById('header');
+      header.innerHTML = 'Ход игрока ' + currentPlayer;
+      
+      const button = document.getElementById('start-button');
+      button.innerHTML = 'Заново!';
+    }
+
+    function handleCellClick(event) {
+      const cell = event.target;
+      const cellIndex = parseInt(cell.getAttribute('cell-index'));
+      
+      if (!isGameActive || clickedCells[cellIndex] === true) {
+        return
+      }
+      
+      cell.innerHTML = currentPlayer;
+      
+      clickedCells[cellIndex] = true;
+      
+      if (currentPlayer === playerX) {
+        playerXState.push(cellIndex);
+      
+        currentPlayer = playerO;
+      } else {
+        playerOState.push(cellIndex);
+        
+        currentPlayer = playerX;
+      }
+      
+      const header = document.getElementById('header');
+      header.innerHTML = 'Ход игрока ' + currentPlayer;
+      
+      checkResult();
+    }
+
+    function checkResult() {
+      let playerXWon = false;
+      let playerOWon = false;
+
+      for (let i = 0; i < winningConditions.length; i++) {
+        const currentCombination = winningConditions[i];
+        
+        if (arraysEqual(currentCombination, playerXState)) {
+          playerXWon = true;
+        }
+        if (arraysEqual(currentCombination, playerOState)) {
+          playerOWon = true;
+        }
+      }
+      
+      let message = '';
+      const header = document.getElementById('header');
+      
+      if (playerXWon === true && playerOWon === false) {
+        isGameActive = false;
+        message = 'Игрок X победил!';
+        header.innerHTML = message;
+        
+      } else if (playerXWon === false && playerOWon === true) {
+        isGameActive = false;
+        message = 'Игрок O победил!';
+        header.innerHTML = message;
+      }
+    }
+
+    function clean() {
+      const cells = document.getElementsByClassName('cell');
+      for (let i=0; i< cells.length; i++) {
+        cells[i].innerHTML = null;
+      }
+      
+      clickedCells = {};
+      playerXState = [];
+      playerOState = [];
+      currentPlayer = playerX;
+    }
+
+    function arraysEqual(a, b) {
+      if (!Array.isArray(a) || !Array.isArray(b)) {
+        return false
+      }
+      if (a.length !== b.length) {
+        return false
+      }
+      
+      for (let i=0; i<a.length; i++) {
+        if (a[i] !== b[i]) {
+          return false
+        }
+      }
+      
+      return true
+    }
+
+    const startButton = document.getElementById('start-button');
+    startButton.addEventListener('click', handleStartButton);
+
+    const cells = document.getElementsByClassName('cell');
+    for (let i = 0; i < cells.length; i++) {
+      const cell = cells[i];
+      
+      cell.addEventListener('click', handleCellClick);
+    }
+  </script>
+</html>
